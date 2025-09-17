@@ -13,83 +13,68 @@ spec:
       url: ${{ steps.trigger.output.PipelineUrl }}
   lifecycle: sandbox
   parameters:
-  - title: Authentication
-    required:
-    - token
-    properties:
-      token:
-        title: Harness API Key
-        description: IDP will use this to trigger the pipeline.
-        type: string
-        ui:widget: password
-        ui:field: HarnessAuthToken
-  - title: App Basics
-    required:
-    - project_name
-    - project_slug
-    - project_owner
-    properties:
-      project_name:
-        title: Project Name
-        type: string
-        description: Human-readable name (e.g., “My Cool App”).
-      project_slug:
-        title: Project Slug (kebab-case)
-        type: string
-        description: Lowercase letters, numbers, dashes; no leading/trailing dash.
-      project_owner:
-        title: Project Owner (email or team)
-        type: string
-        default: todd.parson@harness.io
-      project_description:
-        title: Project Description
-        type: string
-        default: Testing for POC
-      project_name_santitized:
-        title: Project Name (sanitized)
-        type: string
-        description: Lowercase/kebab-case used for Backstage metadata.name. Often
-          same as slug.
-  - title: Repository & Branching
-    required:
-    - gh_org
-    - base_repo
-    - base_branch
-    - new_branch_prefix
-    properties:
-      gh_org:
-        title: GitHub Org
-        type: string
-        default: harness-idp-sandbox
-      base_repo:
-        title: Base Repo (monorepo)
-        type: string
-        default: monorepo-idp-example
-      base_branch:
-        title: Base Branch
-        type: string
-        default: main
-      new_branch_prefix:
-        title: New Branch Prefix
-        type: string
-        default: feature
-  - title: Environment & Region
-    required:
-    - environment_name
-    - aws_region
-    properties:
-      environment_name:
-        title: Environment Name
-        type: string
-        enum:
-        - dev
-        - qa
-        - prod
-        default: dev
-      aws_region:
-        title: AWS Region
-        type: string
-        default: us-east-1
+    - title: App Basics
+      required:
+      - project_name
+      - project_owner
+      properties:
+        project_name:
+          title: Project Name
+          type: string
+          description: Human-readable name (e.g., “My Cool App”).
+        project_owner:
+          title: Project Owner (email or team)
+          type: string
+          default: todd.parson@harness.io
+        project_description:
+          title: Project Description
+          type: string
+          default: Testing for POC
+    - title: Repository & Branching
+      required:
+      - gh_org
+      - base_repo
+      - base_branch
+      - new_branch_prefix
+      properties:
+        gh_org:
+          title: GitHub Org
+          type: string
+          default: harness-idp-sandbox
+        base_repo:
+          title: Base Repo (monorepo)
+          type: string
+          default: monorepo-idp-example
+        base_branch:
+          title: Base Branch
+          type: string
+          default: main
+        new_branch_prefix:
+          title: New Branch Prefix
+          type: string
+          default: feature
+    - title: Environment & Region
+      required:
+      - environment_name
+      - aws_region
+      properties:
+        environment_name:
+          title: Environment Name
+          type: string
+          enum:
+          - dev
+          - qa
+          - prod
+          default: dev
+        aws_region:
+          title: AWS Region
+          type: string
+          default: us-east-1
+        token:
+          title: Harness Token
+          type: string
+          ui:widget: password
+          ui:field: HarnessAuthToken
   steps:
   - id: trigger
     name: Provision React App (run pipeline)
@@ -100,9 +85,7 @@ spec:
       apikey: ${{ parameters.token }}
       inputset:
         project_name: ${{ parameters.project_name }}
-        project_slug: ${{ parameters.project_slug }}
         project_owner: ${{ parameters.project_owner }}
-        project_name_santitized: ${{ parameters.project_name_santitized }}
         project_description: ${{ parameters.project_description }}
         gh_org: ${{ parameters.gh_org }}
         base_branch: ${{ parameters.base_branch }}
