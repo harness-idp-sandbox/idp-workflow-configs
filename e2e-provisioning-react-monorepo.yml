@@ -23,7 +23,7 @@ spec:
           type: string
           description: Human-readable name (e.g., “My Cool App”).
         project_owner:
-          title: Project Owner (email or team)
+          title: Project Owner (email)
           type: string
           default: todd.parson@harness.io
         project_description:
@@ -39,10 +39,12 @@ spec:
       properties:
         gh_org:
           title: GitHub Org
+          description: In which GitHub Org is the organizational IAC monorepo?
           type: string
           default: harness-idp-sandbox
         base_repo:
-          title: Base Repo (monorepo)
+          title: Organization IAC Monorepo
+          description: Pick the IAC monorepo to which this static web app will be provisioned
           type: string
           default: monorepo-idp-example
         base_branch:
@@ -50,7 +52,8 @@ spec:
           type: string
           default: main
         new_branch_prefix:
-          title: New Branch Prefix
+          title: Branch naming standards
+          description: What's the prefix of your new branches?
           type: string
           default: feature
     - title: Environment & Region
@@ -69,6 +72,11 @@ spec:
         aws_region:
           title: AWS Region
           type: string
+          enum:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
           default: us-east-1
         token:
           title: Harness Token
@@ -77,11 +85,10 @@ spec:
           ui:field: HarnessAuthToken
   steps:
   - id: trigger
-    name: Provision React App (run pipeline)
+    name: Provision React App
     action: trigger:harness-custom-pipeline
     input:
-      url:
-      - https://app.harness.io/ng/#/account/<YOUR_ACCOUNT_ID>/orgs/sandbox/projects/parson/pipelines/E2E_React_App_Provisioning/executions
+      url: https://app.harness.io/ng/#/account/<YOUR_ACCOUNT_ID>/orgs/sandbox/projects/parson/pipelines/E2E_React_App_Provisioning/executions
       apikey: ${{ parameters.token }}
       inputset:
         project_name: ${{ parameters.project_name }}
