@@ -36,10 +36,14 @@ spec:
       required: [gh_org, base_repo, base_branch, new_branch_prefix]
       properties:
         gh_org:
-          title: GitHub Org
-          description: In which GitHub Org is the organizational IAC monorepo?
           type: string
-          default: harness-idp-sandbox
+          ui:field: SelectFieldFromApi
+          ui:options:
+            title: GitHub Organization
+            description: In which GitHub Org is the organizational IAC monorepo?
+            path: proxy/github-api/user/orgs?per_page=100
+            valueSelector: login/
+            # default: harness-idp-sandbox
         base_repo:
           title: Organization IAC Monorepo
           description: Pick the IAC monorepo to which this static web app will be provisioned
@@ -74,7 +78,7 @@ spec:
       properties:
         enable_jira:
           title: Create Jira ticket
-          type: string
+          type: boolean
           default: false
 
   steps:
