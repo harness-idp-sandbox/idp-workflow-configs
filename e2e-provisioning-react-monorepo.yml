@@ -41,15 +41,21 @@ spec:
           ui:options:
             title: GitHub Organization
             description: In which GitHub Org is the organizational IAC monorepo?
-            placeholder: Choose a GitHub Organization
             path: proxy/github-api/user/orgs
             valueSelector: login
-            default: harness-idp-sandbox
         base_repo:
-          title: Organization IAC Monorepo
-          description: Pick the IAC monorepo to which this static web app will be provisioned
           type: string
-          default: monorepo-idp-example
+          ui:field: SelectFieldFromApi
+          ui:options:
+            title: Organization IAC Monorepo
+            description: Pick the IAC monorepo to which this static web app will be provisioned
+            placeholder: Choose a Repository
+            path: proxy/github-api/orgs/{{parameters.gh_org}}/repos
+            valueSelector: name
+            default: monorepo-idp-example
+            setContextData:
+              repoVisibility: visibility
+              repoSize: size
         base_branch:
           title: Base Branch
           description: Default branch of the IAC monorepo
