@@ -41,9 +41,10 @@ spec:
           ui:options:
             title: GitHub Organization
             description: In which GitHub Org is the organizational IAC monorepo?
+            placeholder: Choose a GitHub Organization
             path: proxy/github-api/user/orgs
             valueSelector: login
-            # default: harness-idp-sandbox
+            default: harness-idp-sandbox
         base_repo:
           title: Organization IAC Monorepo
           description: Pick the IAC monorepo to which this static web app will be provisioned
