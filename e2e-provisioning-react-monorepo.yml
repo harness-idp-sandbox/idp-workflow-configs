@@ -33,7 +33,7 @@ spec:
           ui:widget: password
           ui:field: HarnessAuthToken
     - title: Repository & Branching
-      required: [gh_org, base_repo, base_branch, new_branch_prefix]
+      required: [gh_org, base_repo, new_branch_prefix]
       properties:
         gh_org:
           type: string
@@ -41,6 +41,7 @@ spec:
           ui:options:
             title: GitHub Organization
             description: In which GitHub Org is the organizational IAC monorepo?
+            placeholder: Choose an Organization
             path: proxy/github-api/user/orgs
             valueSelector: login
         base_repo:
@@ -56,11 +57,27 @@ spec:
             setContextData:
               repoVisibility: visibility
               repoSize: size
-        base_branch:
-          title: Base Branch
+              defaultBranch: default_branch
+        default_branch:
+          title: Repository Default Branch
           description: Default branch of the IAC monorepo
           type: string
-          default: main
+          ui:widget: hidden
+          ui:options:
+            getContextData: '{{formContext.defaultBranch}}'
+          default: main 
+        pr_target_branch:
+          title: Target PR branch (optional)
+          type: string
+          description: "Leave empty to use the repo’s default branch"
+          ui:field: SelectFieldFromApi
+          ui:options:
+            title: Target Branch
+            placeholder: "Choose a branch (or leave empty)"
+            # NOTE: this endpoint lists branches for the selected repo
+            path: proxy/github-api/repos/{{parameters.gh_org}}/{{parameters.base_repo}}/branches?per_page=100
+            valueSelector: name
+            labelSelector: name
         new_branch_prefix:
           title: Branch naming standards
           description: What's the prefix for your new branches?
@@ -100,7 +117,8 @@ spec:
           project_owner:       ${{ parameters.project_owner }}
           project_description: ${{ parameters.project_description }}
           gh_org:              ${{ parameters.gh_org }}
-          base_branch:         ${{ parameters.base_branch }}
+          default_branch:      ${{ parameters.default_branch }}
+          pr_target_branch:    ${{ parameters.pr_target_branch }}
           base_repo:           ${{ parameters.base_repo }}
           new_branch_prefix:   ${{ parameters.new_branch_prefix }}
           environment_name:    ${{ parameters.environment_name }}
@@ -108,12 +126,18 @@ spec:
           enable_jira:         '${{ parameters.enable_jira and "true" or "false" }}'
         showOutputVariables: true
   output:
+    output:
+    text:
+      - title: API Key Details
+        content: |
+          Created Branch: ${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Create_Branch.output.outputVariables.BRANCH_URL'] }}
+          Pull Request: ${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Open_PR.output.outputVariables.PR_URL'] }} 
     links:
       - title: Pipeline Details
         url: ${{ steps.trigger.output.PipelineUrl }}
-      - title: Created Branch
-        url: ${{ steps['Create_Branch'].output.BRANCH_URL }}
-      - title: Pull Request
-        url: ${{ steps['Open_PR'].output.PR_URL }}
+      - title: New Branch URL
+        url: ${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Create_Branch.output.outputVariables.BRANCH_URL'] }}
+      - title: PR URL
+        url: ${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Open_PR.output.outputVariables.PR_URL'] }} 
 
   lifecycle: sandbox
