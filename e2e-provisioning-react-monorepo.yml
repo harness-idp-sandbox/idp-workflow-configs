@@ -6,36 +6,34 @@ name: E2E React App Provisioning
 owner: user:account/todd.parson@harness.io
 orgIdentifier: sandbox
 projectIdentifier: parson
+metadata:
+  description: |
+    Scaffolds a new React app into the DevOps team IAC monorepo, creates a feature branch,
+    commits the scaffolded code, and opens a PR using the E2E_React_App_Provisioning pipeline.
 spec:
-  output:
-    links:
-    - title: Pipeline Details
-      url: ${{ steps.trigger.output.PipelineUrl }}
-  lifecycle: sandbox
   parameters:
-    - title: App Basics
-      required:
-      - project_name
-      - project_owner
+    - title: Details about the new application
+      required: [project_name, project_owner]
       properties:
         project_name:
-          title: Project Name
+          title: Application Name
           type: string
           description: Human-readable name (e.g., “My Cool App”).
         project_owner:
-          title: Project Owner (email)
+          title: App Owner (email)
           type: string
           default: todd.parson@harness.io
         project_description:
-          title: Project Description
+          title: App Description
           type: string
           default: Testing for POC
+        token:
+          title: Harness Token
+          type: string
+          ui:widget: password
+          ui:field: HarnessAuthToken
     - title: Repository & Branching
-      required:
-      - gh_org
-      - base_repo
-      - base_branch
-      - new_branch_prefix
+      required: [gh_org, base_repo, base_branch, new_branch_prefix]
       properties:
         gh_org:
           title: GitHub Org
@@ -49,6 +47,7 @@ spec:
           default: monorepo-idp-example
         base_branch:
           title: Base Branch
+          description: If your repo's default branch is not "main" then enter it here.
           type: string
           default: main
         new_branch_prefix:
@@ -56,50 +55,54 @@ spec:
           description: What's the prefix of your new branches?
           type: string
           default: feature
+
     - title: Environment & Region
-      required:
-      - environment_name
-      - aws_region
+      required: [environment_name, aws_region]
       properties:
         environment_name:
           title: Environment Name
           type: string
-          enum:
-          - dev
-          - qa
-          - prod
+          enum: [dev, qa, prod]
           default: dev
         aws_region:
           title: AWS Region
           type: string
-          enum:
-          - us-east-1
-          - us-east-2
-          - us-west-1
-          - us-west-2
+          enum: [us-east-1, us-east-2, us-west-1, us-west-2]
           default: us-east-1
-        token:
-          title: Harness Token
-          type: string
-          ui:widget: password
-          ui:field: HarnessAuthToken
+
+    - title: Options
+      properties:
+        enable_jira:
+          title: Create Jira ticket
+          type: boolean
+          default: false
+
   steps:
-  - id: trigger
-    name: Provision React App
-    action: trigger:harness-custom-pipeline
-    input:
-      url: https://app.harness.io/ng/account/EeRjnXTnS4GrLG5VNNJZUw/module/cd/orgs/sandbox/projects/parson/pipelines/E2E_React_App_Provisioning/pipeline-studio/?storeType=INLINE
-      apikey: ${{ parameters.token }}
-      inputset:
-        project_name: ${{ parameters.project_name }}
-        project_owner: ${{ parameters.project_owner }}
-        project_description: ${{ parameters.project_description }}
-        gh_org: ${{ parameters.gh_org }}
-        base_branch: ${{ parameters.base_branch }}
-        base_repo: ${{ parameters.base_repo }}
-        new_branch_prefix: ${{ parameters.new_branch_prefix }}
-        environment_name: ${{ parameters.environment_name }}
-        aws_region: ${{ parameters.aws_region }}
-metadata:
-  description: |
-    Scaffolds a new React app into the monorepo via Cookiecutter, creates a feature branch, commits the scaffolded code, and opens a PR using the E2E_React_App_Provisioning pipeline.
+    - id: trigger
+      name: Provision React App
+      action: trigger:harness-custom-pipeline
+      input:
+        url: https://app.harness.io/ng/#/account/EeRjnXTnS4GrLG5VNNJZUw/orgs/sandbox/projects/parson/pipelines/E2E_React_App_Provisioning/executions
+        apikey: ${{ parameters.token }}
+        inputset:
+          project_name:        ${{ parameters.project_name }}
+          project_owner:       ${{ parameters.project_owner }}
+          project_description: ${{ parameters.project_description }}
+          gh_org:              ${{ parameters.gh_org }}
+          base_branch:         ${{ parameters.base_branch }}
+          base_repo:           ${{ parameters.base_repo }}
+          new_branch_prefix:   ${{ parameters.new_branch_prefix }}
+          environment_name:    ${{ parameters.environment_name }}
+          aws_region:          ${{ parameters.aws_region }}
+          enable_jira:         ${{ parameters.enable_jira }}
+        showOutputVariables: true
+  output:
+    links:
+      - title: Pipeline Details
+        url: ${{ steps.trigger.output.PipelineUrl }}
+      - title: Created Branch
+        url: ${{ steps.trigger.output.BRANCH_URL }}
+      - title: Pull Request
+        url: ${{ steps.trigger.output.PR_URL }}
+
+  lifecycle: sandbox
