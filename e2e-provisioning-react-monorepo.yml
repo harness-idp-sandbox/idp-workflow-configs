@@ -94,7 +94,7 @@ spec:
           new_branch_prefix:   ${{ parameters.new_branch_prefix }}
           environment_name:    ${{ parameters.environment_name }}
           aws_region:          ${{ parameters.aws_region }}
-          enable_jira:         ${{ parameters.enable_jira ? "true" : "false" }}
+          enable_jira:         '${{ parameters.enable_jira and "true" or "false" }}'
         showOutputVariables: true
   output:
     links:
