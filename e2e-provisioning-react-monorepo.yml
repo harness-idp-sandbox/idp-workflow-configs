@@ -47,12 +47,12 @@ spec:
           default: monorepo-idp-example
         base_branch:
           title: Base Branch
-          description: If your repo's default branch is not "main" then enter it here.
+          description: Default branch of the IAC monorepo
           type: string
           default: main
         new_branch_prefix:
           title: Branch naming standards
-          description: What's the prefix of your new branches?
+          description: What's the prefix for your new branches?
           type: string
           default: feature
 
@@ -74,7 +74,7 @@ spec:
       properties:
         enable_jira:
           title: Create Jira ticket
-          type: boolean
+          type: string
           default: false
 
   steps:
@@ -94,15 +94,15 @@ spec:
           new_branch_prefix:   ${{ parameters.new_branch_prefix }}
           environment_name:    ${{ parameters.environment_name }}
           aws_region:          ${{ parameters.aws_region }}
-          enable_jira:         ${{ parameters.enable_jira }}
+          enable_jira:         ${{ parameters.enable_jira ? "true" : "false" }}
         showOutputVariables: true
   output:
     links:
       - title: Pipeline Details
         url: ${{ steps.trigger.output.PipelineUrl }}
       - title: Created Branch
-        url: ${{ steps.trigger.output.BRANCH_URL }}
+        url: ${{ steps['Create_Branch'].output.BRANCH_URL }}
       - title: Pull Request
-        url: ${{ steps.trigger.output.PR_URL }}
+        url: ${{ steps['Open_PR'].output.PR_URL }}
 
   lifecycle: sandbox
