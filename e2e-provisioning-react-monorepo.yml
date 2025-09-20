@@ -126,12 +126,10 @@ spec:
           enable_jira:         '${{ parameters.enable_jira and "true" or "false" }}'
         showOutputVariables: true
   output:
-    output:
-      links:
+    links:
       - title: Pipeline Details
         url: ${{ steps.trigger.output.PipelineUrl }}
       - title: New Branch URL
         url: "${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Create_Branch.output.outputVariables.BRANCH_URL'] }}"
       - title: PR URL
         url: "${{ steps.trigger.output['pipeline.stages.App_Provisioner.spec.execution.steps.Open_PR.output.outputVariables.PR_URL'] }}" 
-  lifecycle: sandbox
