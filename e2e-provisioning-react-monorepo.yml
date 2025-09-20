@@ -20,106 +20,90 @@ spec:
           title: Application Name
           type: string
           description: Human-readable name (e.g., “My Cool App”).
+
         project_owner:
           title: App Owner (email)
           type: string
           default: todd.parson@harness.io
+
         project_description:
           title: App Description
           type: string
           default: Testing for POC
+
         token:
           title: Harness Token
           type: string
           ui:widget: password
           ui:field: HarnessAuthToken
+
         requestor_name:
           title: Requestor Name
           type: string
           ui:widget: hidden
           default: ${{ user.entity.metadata.name }}
+
         requestor_email:
           title: Requestor Email
           type: string
           ui:widget: hidden
           default: ${{ user.entity.spec.profile.email }}
+
     - title: Repository & Branching
-      required: [gitUsername, gh_org]
+      required: [github_username, repository]
       properties:
-        gitUsername:
-          title: Repository Owner Username
+        github_username:
+          title: GitHub Username
           description: Enter your GitHub username.
           type: string
-
-        gh_org:
-          title: GitHub Organization
-          type: string
-          description: In which GitHub Org is the IAC monorepo?
-          ui:field: SelectFieldFromApi
-          ui:options:
-            title: GitHub Organization
-            placeholder: Choose an Organization
-            path: proxy/github-api/user/orgs
-            valueSelector: login
 
         repoPicker:
           title: GitHub Repositories
           type: string
-          description: Pick a repo in the selected org
+          description: Pick a repo you have access to
           ui:field: SelectFieldFromApi
           ui:options:
-            path: proxy/github-api/orgs/{{parameters.gh_org}}/repos?per_page=100
-            valueSelector: name
+            path: proxy/github-api/user/repos?per_page=100&affiliation=owner,collaborator,organization_member
+            valueSelector: full_name
+            labelSelector: full_name
             setContextData:
-              repoName: name
-              branch: default_branch
-              type: visibility
+              repo_name: name
+              repo_owner: owner.login
+              repo_full_name: full_name
+              default_branch: default_branch
+              visibility: visibility
 
-        base_repo:
+        repository:
           title: Repo Name
           readonly: true
-          description: Repository Name
           type: string
           ui:field: ContextViewer
           ui:options:
-            getContextData: {{formContext.repoName}}
+            getContextData: {{formContext.repo_name}}
 
         default_branch:
           title: Default Branch
           readonly: true
-          description: Default Branch
           type: string
           ui:field: ContextViewer
           ui:options:
-            getContextData: {{formContext.branch}}
+            getContextData: {{formContext.default_branch}}
 
-        typeName:
+        visibility:
           title: Visibility
           readonly: true
-          description: Visibility
           type: string
           ui:field: ContextViewer
           ui:options:
-            getContextData: {{formContext.type}}
-
-        pr_target_branch:
-          title: Target PR branch (optional)
-          type: string
-          description: "Leave empty to use the repo’s default branch"
-          ui:field: SelectFieldFromApi
-          ui:options:
-            title: Target Branch
-            placeholder: "Choose a branch (or leave empty)"
-            path: proxy/github-api/repos/{{parameters.gh_org}}/{{parameters.base_repo}}/branches?per_page=100
-            valueSelector: name
-            labelSelector: name
+            getContextData: {{formContext.visibility}}
 
         new_branch_prefix:
           title: Branch naming standards
           description: What's the prefix for your new branches?
           type: string
           default: feature
-  
+
+
     - title: Permissions Check
       properties:
         validate_permissions:
@@ -129,7 +113,8 @@ spec:
           ui:options:
             button:
               title: Check my access
-            path: proxy/github-api/repos/{{parameters.gh_org}}/{{parameters.base_repo}}/collaborators/{{parameters.gitUsername}}/permission
+            # use the captured org/repo to avoid string stitching
+            path: proxy/github-api/repos/{{formContext.repo_full_name}}/collaborators/{{parameters.github_username}}/permission
             request:
               method: GET
             setContextData:
@@ -138,7 +123,6 @@ spec:
         resolved_permission:
           title: Your repo permission
           readonly: true
-          description: Result of the permission check (expect write/maintain/admin).
           type: string
           ui:field: ContextViewer
           ui:options:
@@ -158,6 +142,7 @@ spec:
           type: string
           enum: [dev, qa, prod]
           default: dev
+
         aws_region:
           title: AWS Region
           type: string
@@ -170,7 +155,6 @@ spec:
           title: Create Jira ticket
           type: boolean
           default: false
-
   steps:
     - id: trigger
       name: Provision React App
@@ -182,17 +166,16 @@ spec:
           project_name:        ${{ parameters.project_name }}
           project_owner:       ${{ parameters.project_owner }}
           project_description: ${{ parameters.project_description }}
-          gh_org:              ${{ parameters.gh_org }}
+          gh_org:              ${{ formContext.repo_owner }}   
           default_branch:      ${{ parameters.default_branch }}
-          pr_target_branch:    ${{ parameters.pr_target_branch }}
-          base_repo:           ${{ parameters.base_repo }}
+          base_repo:           ${{ formContext.repo_name }}    
           new_branch_prefix:   ${{ parameters.new_branch_prefix }}
           environment_name:    ${{ parameters.environment_name }}
           aws_region:          ${{ parameters.aws_region }}
           enable_jira:         '${{ parameters.enable_jira and "true" or "false" }}'
           requestor_name:      ${{ parameters.requestor_name }}
           requestor_email:     ${{ parameters.requestor_email }}
-          github_username:     ${{ parameters.gitUsername }}
+          github_username:     ${{ parameters.github_username }}
         showOutputVariables: true
   output:
     links:
