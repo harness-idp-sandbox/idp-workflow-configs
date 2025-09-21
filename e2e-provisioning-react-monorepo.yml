@@ -116,50 +116,50 @@ spec:
           ui:options:
             help: "Lowercase letters/numbers/.-_; 2–21 chars total."
 
-    - title: Debug (temporary)
-      properties:
-        whoami:
-          title: Debug Who am I?
-          type: string
-          ui:field: ValidateAndFetch
-          ui:options:
-            button:
-              title: Call /user
-            path: 'proxy/github-api/user'
-            request:
-              method: GET
-            setContextData:
-              gh_identity: login
+    # - title: Debug (temporary)
+    #   properties:
+    #     whoami:
+    #       title: Debug Who am I?
+    #       type: string
+    #       ui:field: ValidateAndFetch
+    #       ui:options:
+    #         button:
+    #           title: Call /user
+    #         path: 'proxy/github-api/user'
+    #         request:
+    #           method: GET
+    #         setContextData:
+    #           gh_identity: login
 
-        token_identity:
-          title: Proxy token identity
-          readonly: true
-          type: string
-          ui:field: ContextViewer
-          ui:options:
-            getContextData: '{{formContext.gh_identity}}'
+    #     token_identity:
+    #       title: Proxy token identity
+    #       readonly: true
+    #       type: string
+    #       ui:field: ContextViewer
+    #       ui:options:
+    #         getContextData: '{{formContext.gh_identity}}'
 
-        repo_probe:
-          title: Debug Repo probe
-          type: string
-          ui:field: ValidateAndFetch
-          ui:options:
-            button:
-              title: Call /repos/{owner}/{repo}
-            path: 'proxy/github-api/repos/{{parameters.repo_owner}}/{{parameters.repository}}'
-            request:
-              method: GET
-            setContextData:
-              repo_private: private
-              repo_fullname: full_name
+    #     repo_probe:
+    #       title: Debug Repo probe
+    #       type: string
+    #       ui:field: ValidateAndFetch
+    #       ui:options:
+    #         button:
+    #           title: Call /repos/{owner}/{repo}
+    #         path: 'proxy/github-api/repos/{{parameters.repo_owner}}/{{parameters.repository}}'
+    #         request:
+    #           method: GET
+    #         setContextData:
+    #           repo_private: private
+    #           repo_fullname: full_name
 
-        repo_visibility:
-          title: Visible to proxy token?
-          readonly: true
-          type: string
-          ui:field: ContextViewer
-          ui:options:
-            getContextData: '{{formContext.repo_fullname}}'
+    #     repo_visibility:
+    #       title: Visible to proxy token?
+    #       readonly: true
+    #       type: string
+    #       ui:field: ContextViewer
+    #       ui:options:
+    #         getContextData: '{{formContext.repo_fullname}}'
 
     - title: Permissions Check
       properties:
@@ -200,15 +200,6 @@ spec:
           type: string
           readonly: true
           description: You’ll need at least "write" permission on this repo to create branches/PRs.
-        ui:options:
-          disableSubmitWhen:
-            anyOf:
-              - equals:
-                  left: "{{formContext.gh_permission}}"
-                  right: ""
-              - in:
-                  left: "{{formContext.gh_permission}}"
-                  right: ["read", "triage", null]
 
     - title: Environment & Region
       required: [environment_name, aws_region]
