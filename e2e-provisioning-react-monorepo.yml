@@ -57,8 +57,9 @@ spec:
     properties:
       github_username:
         title: GitHub Username
-        description: Enter your GitHub username.
+        description: Enter your GitHub username (just the handle, no '@')
         type: string
+        pattern: "^[A-Za-z0-9-]+$"
       repoPicker:
         title: GitHub Repositories
         type: string
@@ -80,26 +81,72 @@ spec:
         type: string
         ui:field: ContextViewer
         ui:options:
-          getContextData: ${{formContext.repo_name}}
+          getContextData: {{formContext.repo_name}}
       default_branch:
         title: Default Branch
         readonly: true
         type: string
         ui:field: ContextViewer
         ui:options:
-          getContextData: ${{formContext.default_branch}}
+          getContextData: {{formContext.default_branch}}
       visibility:
         title: Visibility
         readonly: true
         type: string
         ui:field: ContextViewer
         ui:options:
-          getContextData: ${{formContext.visibility}}
+          getContextData: {{formContext.visibility}}
       new_branch_prefix:
         title: Branch naming standards
         description: What's the prefix for your new branches?
         type: string
         default: feature
+
+  - title: Debug (temporary)
+    properties:
+      whoami:
+        title: Debug: Who am I?
+        type: string
+        ui:field: ValidateAndFetch
+        ui:options:
+          button:
+            title: Call /user
+          path: proxy/github-api/user
+          request:
+            method: GET
+          setContextData:
+            gh_identity: login
+
+      token_identity:
+        title: Proxy token identity
+        readonly: true
+        type: string
+        ui:field: ContextViewer
+        ui:options:
+          getContextData: {{formContext.gh_identity}}
+
+      repo_probe:
+        title: Debug: Repo probe
+        type: string
+        ui:field: ValidateAndFetch
+        ui:options:
+          button:
+            title: Call /repos/{owner}/{repo}
+          path: proxy/github-api/repos/{{formContext.repo_owner}}/{{formContext.repo_name}}
+          request:
+            method: GET
+          setContextData:
+            repo_private: private
+            repo_fullname: full_name
+
+      repo_visibility:
+        title: Visible to proxy token?
+        readonly: true
+        type: string
+        ui:field: ContextViewer
+        ui:options:
+          getContextData: {{formContext.repo_fullname}}
+
   - title: Permissions Check
     properties:
       validate_permissions:
@@ -109,7 +156,7 @@ spec:
         ui:options:
           button:
             title: Check my access
-          path: proxy/github-api/repos/{{formContext.repo_full_name}}/collaborators/{{parameters.github_username}}/permission
+          path: proxy/github-api/repos/{{formContext.repo_owner}}/{{formContext.repo_name}}/collaborators/{{parameters.github_username}}/permission
           request:
             method: GET
           setContextData:
@@ -120,13 +167,15 @@ spec:
         type: string
         ui:field: ContextViewer
         ui:options:
-          getContextData: ${{formContext.gh_permission}}
+          getContextData: {{formContext.gh_permission}}
       permission_hint:
         title: Heads up
         type: string
         readonly: true
         description: You’ll need at least "write" permission on this repo to create
           branches/PRs.
+
+
   - title: Environment & Region
     required:
     - environment_name
@@ -166,9 +215,9 @@ spec:
         project_name: ${{ parameters.project_name }}
         project_owner: ${{ parameters.project_owner }}
         project_description: ${{ parameters.project_description }}
-        gh_org: ${{ formContext.repo_owner }}
+        gh_org: ${{ parameters.repo_owner }}
         default_branch: ${{ parameters.default_branch }}
-        base_repo: ${{ formContext.repo_name }}
+        base_repo: ${{ parameters.repository }}
         new_branch_prefix: ${{ parameters.new_branch_prefix }}
         environment_name: ${{ parameters.environment_name }}
         aws_region: ${{ parameters.aws_region }}
