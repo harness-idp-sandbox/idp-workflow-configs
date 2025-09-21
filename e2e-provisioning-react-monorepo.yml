@@ -24,9 +24,16 @@ spec:
           title: Application Name
           type: string
           description: Human-readable name (e.g., “My Cool App”).
+          minLength: 3
+          maxLength: 50
+          pattern: "^[A-Za-z0-9][A-Za-z0-9 _-]*[A-Za-z0-9]$"
+          ui:options:
+            placeholder: "My Cool App"
+            help: "Letters/numbers/spaces/dash/underscore; no leading/trailing spaces."
         project_owner:
           title: App Owner (email)
           type: string
+          format: email
           default: todd.parson@harness.io
         project_description:
           title: App Description
@@ -46,6 +53,10 @@ spec:
           description: Enter your GitHub username (just the handle, no '@')
           type: string
           pattern: "^[A-Za-z0-9-]+$"
+          minLength: 1
+          maxLength: 39
+          ui:options:
+            placeholder: "octocat"
 
         repoPicker:
           title: GitHub Repositories
@@ -56,6 +67,7 @@ spec:
             path: 'proxy/github-api/user/repos?per_page=100&affiliation=owner,collaborator,organization_member'
             valueSelector: full_name
             labelSelector: full_name
+            required: true
             setContextData:
               repo_name: name
               repo_owner: owner.login
@@ -100,6 +112,9 @@ spec:
           description: What's the prefix for your new branches?
           type: string
           default: feature
+          pattern: "^[a-z0-9][a-z0-9._-]{1,20}$"
+          ui:options:
+            help: "Lowercase letters/numbers/.-_; 2–21 chars total."
 
     - title: Debug (temporary)
       properties:
@@ -185,6 +200,15 @@ spec:
           type: string
           readonly: true
           description: You’ll need at least "write" permission on this repo to create branches/PRs.
+        ui:options:
+          disableSubmitWhen:
+            anyOf:
+              - equals:
+                  left: "{{formContext.gh_permission}}"
+                  right: ""
+              - in:
+                  left: "{{formContext.gh_permission}}"
+                  right: ["read", "triage", null]
 
     - title: Environment & Region
       required: [environment_name, aws_region]
