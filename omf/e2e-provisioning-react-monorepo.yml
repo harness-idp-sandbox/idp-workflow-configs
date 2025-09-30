@@ -4,8 +4,8 @@ type: workflow
 identifier: e2e_react_app_provisioning_workflow
 name: E2E React App Provisioning
 owner: user:account/todd.parson@harness.io
-orgIdentifier: sandbox
-projectIdentifier: parson
+orgIdentifier: default
+projectIdentifier: Reference_Architecture
 spec:
   output:
     links:
@@ -34,7 +34,6 @@ spec:
           title: App Owner (email)
           type: string
           format: email
-          default: todd.parson@harness.io
         project_description:
           title: App Description
           type: string
@@ -229,7 +228,7 @@ spec:
       name: Provision React App
       action: trigger:harness-custom-pipeline
       input:
-        url: https://app.harness.io/ng/#/account/EeRjnXTnS4GrLG5VNNJZUw/orgs/sandbox/projects/parson/pipelines/E2E_React_App_Provisioning/executions
+        url: https://app.harness.io/ng/#/account/QjX9VM9_Rzadbtp13oBkrg/orgs/default/projects/Reference_Architecture/pipelines/E2E_React_App_Provisioning/executions
         apikey: ${{ parameters.token }}
         inputset:
           project_name:        ${{ parameters.project_name }}
