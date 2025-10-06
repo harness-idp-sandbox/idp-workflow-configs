@@ -20,6 +20,7 @@ idp-workflow-configs/
 │     ├─ PIPELINE-README.md
 │     ├─ e2e-react-app-provisioning-workflowform.yml
 │     └─ WORKFLOW-FORM-README.md
+├─ reusable-templates/
 │  └─ <idp_use_case>/
 │     ├─ <idp_use_case>-pipeline.yml
 │     ├─ PIPELINE-README.md
